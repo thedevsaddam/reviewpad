@@ -15,6 +15,7 @@ import (
 
 	"github.com/google/go-github/v42/github"
 	"github.com/migueleliasweb/go-github-mock/src/mock"
+	"github.com/reviewpad/reviewpad/v2/collector"
 	"github.com/reviewpad/reviewpad/v2/lang/aladino"
 	plugins_aladino "github.com/reviewpad/reviewpad/v2/plugins/aladino"
 	"github.com/shurcooL/githubv4"
@@ -41,6 +42,7 @@ func GetDefaultMockPullRequestDetails() *github.PullRequest {
 		},
 		Title:     github.String("Amazing new feature"),
 		Body:      github.String("Please pull these awesome changes in!"),
+		URL:       github.String("pullRequestURL"),
 		CreatedAt: &prDate,
 		Comments:  github.Int(6),
 		Commits:   github.Int(5),
@@ -178,7 +180,7 @@ func MockEnvWith(prOwner string, prRepoName string, prNum int, client *github.Cl
 		ctx,
 		client,
 		clientGQL,
-		nil,
+		collector.NewCollector("", ""),
 		pr,
 		plugins_aladino.PluginBuiltIns(),
 	)
