@@ -1,0 +1,19 @@
+api-version: reviewpad.com/v2.x
+
+mode: silent
+edition: professional
+
+rules:
+  - name: approved-by-thedevsaddam
+    kind: patch
+    description: Checks if the pull request was approved by thedevsaddam
+    spec: '$reviewerStatus("avocadooo8991") == "approved"'
+
+workflows:
+  - name: help-with-builtins
+    description: Help with new built-in
+    always-run: true
+    if:
+      - rule: approved-by-thedevsaddam
+    then:
+      - '$info("The PR is Approved by Saddam H")'

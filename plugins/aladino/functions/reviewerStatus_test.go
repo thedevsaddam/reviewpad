@@ -5,13 +5,80 @@
 package plugins_aladino_functions_test
 
 import (
+	"log"
 	"testing"
 
+	"github.com/google/go-github/v42/github"
+	"github.com/migueleliasweb/go-github-mock/src/mock"
+	"github.com/reviewpad/reviewpad/v3/lang/aladino"
 	plugins_aladino "github.com/reviewpad/reviewpad/v3/plugins/aladino"
+	"github.com/stretchr/testify/assert"
 )
 
-var reviewersTemp = plugins_aladino.PluginBuiltIns().Functions["reviewers"].Code
+var reviewerStatus = plugins_aladino.PluginBuiltIns().Functions["reviewerStatus"].Code
+
+// func TestReviewerStatus(t *testing.T) {
+// 	ghUsersReviewers := []*github.User{
+// 		{Login: github.String("mary")},
+// 	}
+// 	ghTeamReviewers := []*github.Team{
+// 		{Slug: github.String("reviewpad")},
+// 	}
+// 	mockedPullRequest := aladino.GetDefaultMockPullRequestDetailsWith(&github.PullRequest{
+// 		User: &github.User{
+// 			Login: github.String("john"),
+// 		},
+// 		RequestedReviewers: ghUsersReviewers,
+// 		RequestedTeams:     ghTeamReviewers,
+// 	})
+// 	mockedEnv, err := aladino.MockDefaultEnv(
+// 		[]mock.MockBackendOption{
+// 			mock.WithRequestMatchHandler(
+// 				mock.GetReposPullsRequestedReviewersByOwnerByRepoByPullNumber,
+// 				http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+// 					w.Write(mock.MustMarshal(mockedPullRequest))
+// 				}),
+// 			),
+// 		},
+// 		nil,
+// 	)
+// 	if err != nil {
+// 		log.Fatalf("mockDefaultEnv failed: %v", err)
+// 	}
+
+// 	wantReviewState := aladino.BuildStringValue("neutral")
+
+// 	args := []aladino.Value{}
+// 	gotReviewState, err := reviewerStatus(mockedEnv, args)
+
+// 	assert.Nil(t, err)
+// 	assert.Equal(t, wantReviewState, gotReviewState)
+// }
 
 func TestReviewerStatus(t *testing.T) {
+	reviews := []*github.PullRequestReview{
+		{
+			State: github.String("COMMENTED"),
+		},
+	}
+	mockedEnv, err := aladino.MockDefaultEnv(
+		[]mock.MockBackendOption{
+			mock.WithRequestMatch(
+				mock.GetReposPullsReviewsByOwnerByRepoByPullNumber,
+				reviews,
+			),
+		},
+		nil,
+	)
+	if err != nil {
+		log.Fatalf("mockDefaultEnv failed: %v", err)
+	}
 
+	wantReviewState := aladino.BuildStringValue("neutral")
+
+	args := []aladino.Value{aladino.BuildStringValue("mary")}
+	gotReviewState, err := reviewerStatus(mockedEnv, args)
+
+	assert.Nil(t, err)
+	assert.Equal(t, wantReviewState, gotReviewState)
 }
